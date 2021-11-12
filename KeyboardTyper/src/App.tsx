@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { baseUrl, weatherForecastUrl } from './urls'
+import Exercise from './Components/Exercise'
 
 function App() {
     const [result, setResult] = useState<any[]>([]);
+    const [someText, setSomeText] = useState<string>("");
     console.log(weatherForecastUrl);
     useEffect(() => {
         fetch(weatherForecastUrl)
@@ -12,6 +14,8 @@ function App() {
             .then(res => {
                 setResult(res);
             })
+            .catch(err => { });
+        setSomeText("Dupa 123 123 hehe");
     }, []);
 
   return (
@@ -40,6 +44,8 @@ function App() {
                       <li>{res.date}, {res.summary}</li>
                   ))}
               </ul>}
+
+              <Exercise mainText={someText} />
       </header>
     </div>
   );
