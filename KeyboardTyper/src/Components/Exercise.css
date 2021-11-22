@@ -5,3 +5,7 @@
 .bad {
     color: red;
 }
+
+span {
+    white-space: pre;
+}

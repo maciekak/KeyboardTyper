@@ -6,7 +6,7 @@ import Exercise from './Components/Exercise'
 
 function App() {
     const [result, setResult] = useState<any[]>([]);
-    const [someText, setSomeText] = useState<string>("");
+    const [someText, setSomeText] = useState<string[]>([]);
     console.log(weatherForecastUrl);
     useEffect(() => {
         fetch(weatherForecastUrl)
@@ -15,7 +15,7 @@ function App() {
                 setResult(res);
             })
             .catch(err => { });
-        setSomeText("Dupa 123 123 hehe");
+        setSomeText(["Dupa 123 123 hehe", "second line hehehe"]);
     }, []);
 
   return (

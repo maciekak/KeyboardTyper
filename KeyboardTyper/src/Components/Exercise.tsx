@@ -1,60 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import './Exercise.css';
 
+type Row = {
+    letters: Letter[];
+}
+
 type Letter = {
     value: string;
     isCorrect: boolean;
 }
 
 type MyProps = {
-    mainText: string;
+    mainText: string[];
 };
 
 type MyState = {
-    writtenText: string;
-    letters: Letter[];
+    rows: Row[];
+    currentRow: number;
 };
 
 class Exercise extends React.Component<MyProps, MyState> {
-    mainText: string;
-
     constructor(props: any) {
         super(props);
-        this.state = { writtenText: "", letters: [] };
-
-        this.mainText = props.mainText;
+        console.log("constructor", props.mainText);
+        const rows_ = props.mainText.map((line: string) => {
+            return { letters: [] };
+        });
+        this.state = { rows: rows_, currentRow: 0 };
     }
 
-    keyHandler = (event: any) => {
-        console.log("dupa");
+    keyHandler = (event: KeyboardEvent) => {
+        if (event instanceof KeyboardEvent && event.key.length === 1) {
+            let currentRow = this.state.currentRow;
+            currentRow = this.props.mainText[currentRow].length === this.state.rows[currentRow].letters.length ? currentRow + 1 : currentRow;
+            if (currentRow === this.props.mainText.length) {
+                currentRow--;
+            }
+            const correctText = this.props.mainText[currentRow];
+            const newLetterIndex = this.state.rows[currentRow].letters.length;
+            const isCorrect = !!correctText.charAt(newLetterIndex) && correctText[newLetterIndex] === event.key;
+            const newRowLetters = [...this.state.rows[currentRow].letters, { value: event.key, isCorrect: isCorrect }];
+            const updatedRows = this.state.rows.slice(0, currentRow).concat([{ letters: newRowLetters }]).concat(this.state.rows.slice(currentRow + 1))
+            this.setState({ rows: updatedRows, currentRow: currentRow });
+        } else if (event instanceof KeyboardEvent && event.key === 'Backspace') {
+            let currentRow = this.state.currentRow;
+            if (this.state.rows[0].letters.length === 0) {
+                return;
+            }
+            const newRowLetters = this.state.rows[currentRow].letters.slice(0, -1);
+            const updatedRows = this.state.rows.slice(0, currentRow).concat([{ letters: newRowLetters }]).concat(this.state.rows.slice(currentRow + 1))
+            if (newRowLetters.length === 0) {
+                currentRow = currentRow > 0 ? currentRow - 1 : 0;
+            }
+
+            this.setState({ rows: updatedRows, currentRow: currentRow });
+        }
     }
-    keyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        console.log("here123");
-        console.log(event.key);
-        const newLetterIndex = this.state.letters.length;
-        const isCorrect = !!this.mainText.charAt(newLetterIndex) && this.mainText[newLetterIndex] == event.key;
-        const newLetters = [...this.state.letters, { value: event.key, isCorrect: isCorrect}];
-        this.setState({ writtenText: this.state.writtenText + event.key, letters: newLetters });
-    };
+
     componentDidMount() {
-        document.addEventListener("click", this.keyHandler, false);
         document.addEventListener("keydown", this.keyHandler);
     };
 
 
     componentWillUnmount() {
-        document.removeEventListener("click", this.keyHandler, false);
         document.removeEventListener("keydown", this.keyHandler);
     };
 
     render() {
         return (
-            <div onKeyPress={this.keyDownHandler}>
-                <h1>{this.props.mainText}</h1>
-                <div>
-                    {this.state.letters.map(letter => <span className={letter.isCorrect ? 'good' : 'bad'}>{letter.value}</span>)}
-                </div>
-                <input value={this.state.writtenText} autoFocus/>
+            <div>
+                {this.state.rows.map((row, index) => 
+                    <div>
+                        <h1>{this.props.mainText[index]}</h1>
+                        {row.letters.length > 0 &&
+                            <div>
+                            {row.letters.map(letter => <span className={letter.isCorrect ? 'good' : 'bad'}>{letter.value}</span>)}
+                            </div>}
+                        {row.letters.length == 0 &&
+                            <div>
+                                <span> </span>
+                            </div>}
+                    </div>
+                )}
             </div>
         );
     }
